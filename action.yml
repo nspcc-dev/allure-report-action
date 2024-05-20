@@ -53,6 +53,37 @@ inputs:
     description: 'GitHub server URL'
     required: true
     default: ${{ github.server_url }}
+  allure_release:
+    description: 'Allure release'
+    required: false
+    default: '2.27.0'
+  allure_repo:
+    description: 'Allure repo'
+    required: false
+    default: 'https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: composite
+  steps:
+    - name: Setup java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '8'
+    
+    - name: Download allure cli
+      shell: bash
+      run: |
+        wget --no-verbose -O /tmp/allure-${{ inputs.allure_release }}.tgz ${{ inputs.allure_repo }}/${{ inputs.allure_release }}/allure-commandline-${{ inputs.allure_release }}.tgz
+        tar -xf /tmp/allure-${{ inputs.allure_release }}.tgz
+        chmod -R +x allure-${{ inputs.allure_release }}/bin
+        echo allure-${{ inputs.allure_release }}/bin >> $GITHUB_PATH
+      
+    - name: Generate report
+      shell: bash
+      run: |
+        echo '{"name":"GitHub Actions","type":"github","reportName":"Allure Report",' > ${{ inputs.allure_results }}/executor.json
+        echo "\"url\":\"https://${{ inputs.github_repo_owner }}.github.io/${{ inputs.github_repo }}\"," >> ${{ inputs.allure_results }}/executor.json # ???
+        echo "\"reportUrl\":\"https://${{ inputs.github_repo_owner }}.github.io/${{ inputs.github_repo }}/${{ inputs.github_run_num }}/\"," >> ${{ inputs.allure_results }}/executor.json
+        echo "\"buildUrl\":\"${{ inputs.github_server_url }}/${{ inputs.github_repo }}/actions/runs/${{ inputs.github_run_id }}\"," >> ${{ inputs.allure_results }}/executor.json
+        echo "\"buildName\":\"GitHub Actions Run #${{ inputs.github_run_id }}\",\"buildOrder\":\"${{ inputs.github_run_num }}\"}" >> ${{ inputs.allure_results }}/executor.json
+        allure generate --clean ${{ inputs.allure_results }} -o ${{ inputs.allure_report }}
