@@ -56,7 +56,7 @@ inputs:
   allure_release:
     description: 'Allure release'
     required: false
-    default: '2.27.0'
+    default: '2.35.1'
   allure_repo:
     description: 'Allure repo'
     required: false
@@ -87,3 +87,4 @@ runs:
         echo "\"buildUrl\":\"${{ inputs.github_server_url }}/${{ inputs.github_repo }}/actions/runs/${{ inputs.github_run_id }}\"," >> ${{ inputs.allure_results }}/executor.json
         echo "\"buildName\":\"GitHub Actions Run #${{ inputs.github_run_id }}\",\"buildOrder\":\"${{ inputs.github_run_num }}\"}" >> ${{ inputs.allure_results }}/executor.json
         allure generate --clean ${{ inputs.allure_results }} -o ${{ inputs.allure_report }}
+        allure generate --single-file ${{ inputs.allure_results }} -o ${{ inputs.allure_report }}
