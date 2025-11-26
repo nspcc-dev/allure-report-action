@@ -60,11 +60,14 @@ inputs:
   allure_release:
     description: 'Allure release'
     required: false
-    default: '2.27.0'
+    default: '2.35.1'
   allure_repo:
     description: 'Allure repo'
     required: false
     default: 'https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline'
+  report_name:
+    description: 'Allure report name/title'
+    required: false
 runs:
   using: composite
   steps:
@@ -90,4 +93,4 @@ runs:
         echo "\"reportUrl\":\"https://${{ inputs.github_repo_owner }}.github.io/${{ inputs.github_repo }}/${{ inputs.github_run_num }}/\"," >> ${{ inputs.allure_results }}/executor.json
         echo "\"buildUrl\":\"${{ inputs.github_server_url }}/${{ inputs.github_repo }}/actions/runs/${{ inputs.github_run_id }}\"," >> ${{ inputs.allure_results }}/executor.json
         echo "\"buildName\":\"GitHub Actions Run #${{ inputs.github_run_id }}\",\"buildOrder\":\"${{ inputs.github_run_num }}\"}" >> ${{ inputs.allure_results }}/executor.json
-        allure generate --clean ${{ inputs.allure_results }} -o ${{ inputs.allure_report }}
+        allure generate --single-file --clean ${{ inputs.allure_results }} -o ${{ inputs.allure_report }}
